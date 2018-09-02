@@ -1,13 +1,17 @@
 #!/bin/bash
+set -eu
 
-source $(dirname $0)/../conf/doll.cfg
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
+
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
+
+DOLLFILE=${CONF_DIR}/${DOLLFILE}
 
 do_list() {
-	CMD='puppet cert list --all | grep ^+ | egrep -o "^[^\"]*\"[^\"]*\"" | sed "s/[\+ \"]*//g" | sort -u'
+	CMD="${SUDO:-} ${PUPPET_PATH:-}puppet cert list --all | grep ^+ | egrep -o '^[^\"]*\"[^\"]*\"' | sed 's/[\+ \"]*//g' | sort -u"
 	ssh ${PUPPETUSER}@${PUPPETMASTER} "${CMD}"
 }
 
-${DEBUG} && echo " ${0}: loading dolls list"
-
-do_list > $(dirname $0)/../conf/${DOLLFILE}
-
+do_list > "${DOLLFILE}"

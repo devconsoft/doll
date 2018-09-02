@@ -1,12 +1,11 @@
 #!/bin/bash
+set -eu
 
-# TODO Usage
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
 
-FACT=$1
-CMD="facter ${FACT}"
-PAR=3
-
-source $(dirname $0)/../conf/doll.cfg
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
 
 usage() {
 	echo " doll factfilter <fact> <legal value1> <legal value2> <...>"
@@ -20,7 +19,7 @@ usage() {
 rest_contains_first_element () {
 	local e
 	for e in "${@:2}"
-	do 
+	do
 		[[ "$e" == "$1" ]] && return 0
 	done
 	return 1
@@ -29,29 +28,34 @@ rest_contains_first_element () {
 
 [ $# -lt 2 ] && usage
 
+FACT=$1
+CMD="${PUPPET_PATH:-}facter ${FACT}"
+PAR=3
+DOLLFILE=${CONF_DIR}/${DOLLFILE}
+
 shift # we only want to keep the list of legal values
 
 TMPDIR=$(mktemp -d)
 
-[ -s "$(dirname $0)/../conf/${DOLLFILE}" ] && {
+[ -s "${DOLLFILE}" ] && {
 	parallel-ssh \
-		--hosts="$(dirname $0)/../conf/${DOLLFILE}" \
-		-l ${REMOTEUSER} \
-		-p ${PAR} \
-		-O ConnectTimeout=${CONNECTION_TIMEOUT} \
-		-t ${CMD_TIMEOUT} \
-		-o ${TMPDIR} \
-		-P ${CMD}
-	
+		--hosts="${DOLLFILE}" \
+		-l "${REMOTEUSER}" \
+		-p "${PAR}" \
+		-O ConnectTimeout="${CONNECTION_TIMEOUT}" \
+		-t "${CMD_TIMEOUT}" \
+		-o "${TMPDIR}" \
+		-P "${CMD}"
+
 	doll clear
-	
-	for HOST in $(ls ${TMPDIR})
+
+	for HOST in "${TMPDIR}"/*
 	do
-		ACTUAL=$(cat ${TMPDIR}/${HOST})
-		if rest_contains_first_element "${ACTUAL}" $@ # note there has been a shift
+		ACTUAL=$(cat "${TMPDIR}/${HOST}")
+		if rest_contains_first_element "${ACTUAL}" "$@" # note there has been a shift
 		then
-			echo ${HOST} >> "$(dirname $0)/../conf/${DOLLFILE}"
-		fi		
+			echo ${HOST} >> "${DOLLFILE}"
+		fi
 	done
 }
 

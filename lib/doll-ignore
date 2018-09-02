@@ -1,17 +1,23 @@
 #!/bin/bash
+set -eu
 
-DOLL=$1
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
 
-source $(dirname $0)/../conf/doll.cfg
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
+
+IGNOREFILE=${CONF_DIR}/${IGNOREFILE}
 
 usage() {
 	echo " doll ignore <doll>"
 	echo
-	echo " put doll on ignore list" 
+	echo " put doll on ignore list"
 	exit 1
 }
 
 [ $# -ne 1 ] && usage
 
-echo "${DOLL}" >> "$(dirname $0)/../conf/${IGNOREFILE}"
+DOLL=$1
 
+echo "${DOLL}" >> "${IGNOREFILE}"

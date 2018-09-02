@@ -1,26 +1,33 @@
 #!/bin/bash
+set -eu
 
-CMD=$1
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
 
-source $(dirname $0)/../conf/doll.cfg
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
+
+DOLLFILE=${CONF_DIR}/${DOLLFILE}
+IGNOREFILE=${CONF_DIR}/${IGNOREFILE}
 
 usage() {
 	echo " doll run <cmd>"
 	echo
-	echo " let all loaded unignored dolls run given command" 
+	echo " let all loaded unignored dolls run given command"
 	exit 1
 }
 
 [ $# -ne 1 ] && usage
 
-FILTERED_DOLLS_LIST=$(grep "$(dirname $0)/../conf/${DOLLFILE}" -vf "$(dirname $0)/../conf/${IGNOREFILE}")
+CMD=$1
+FILTERED_DOLLS_LIST=$(grep "${DOLLFILE}" -vf "${IGNOREFILE}")
 
 [ -n "${FILTERED_DOLLS_LIST}" ] && {
 	parallel-ssh \
 		--hosts=<(echo "${FILTERED_DOLLS_LIST}") \
-		-l ${REMOTEUSER} \
-		-p ${PARALLELISM} \
-		-O ConnectTimeout=${CONNECTION_TIMEOUT} \
-		-t ${CMD_TIMEOUT} \
-		-P ${CMD}
+		-l "${REMOTEUSER}" \
+		-p "${PARALLELISM}" \
+		-O ConnectTimeout="${CONNECTION_TIMEOUT}" \
+		-t "${CMD_TIMEOUT}" \
+		-P "${CMD}"
 }

@@ -1,17 +1,21 @@
 #!/bin/bash
+set -eu
 
-DOLL=$1
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
 
-source $(dirname $0)/../conf/doll.cfg
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
 
 usage() {
-	echo " doll filter <doll>"
+	echo " doll add <doll>"
 	echo
-	echo " add doll to dolls list" 
+	echo " add doll to dolls list"
 	exit 1
 }
 
 [ $# -ne 1 ] && usage
 
-echo "${DOLL}" >> "$(dirname $0)/../conf/${DOLLFILE}"
+DOLL=$1
 
+echo "${DOLL}" >> "${CONF_DIR}/${DOLLFILE}"

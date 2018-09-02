@@ -1,3 +1,10 @@
 #!/bin/bash
+set -eu
 
-doll run "puppet agent --onetime"
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
+
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
+
+doll run "${SUDO:-} ${PUPPET_PATH:-}puppet agent --onetime"

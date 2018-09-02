@@ -1,6 +1,12 @@
 #!/bin/bash
+set -eu
 
-source $(dirname $0)/../conf/doll.cfg
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
 
-echo -n > "$(dirname $0)/../conf/${DOLLFILE}"
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
 
+DOLLFILE=${CONF_DIR}/${DOLLFILE}
+
+echo -n > "${DOLLFILE}"

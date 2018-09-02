@@ -1,17 +1,17 @@
 #!/bin/bash
+set -eu
 
 CMD=$1
-
+BIN_DIR=$(cd "$(dirname "$0")" && pwd)
+LIB_DIR="$(cd "${BIN_DIR}/../lib" && pwd)"
 shift
 
-EXE=$(dirname ${0})/../lib/$(basename ${0})-${CMD}
+EXE=${LIB_DIR}/$(basename "${0}")-${CMD}
 
-if [ -x ${EXE} ]
+if [ -x "${EXE}" ]
 then
-	${EXE} "$@"
-
+	export PATH=${BIN_DIR}:${PATH}
+	"${EXE}" "$@"
 else
 	doll help
 fi
-
-

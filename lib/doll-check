@@ -1,13 +1,15 @@
 #!/bin/bash
-set -e
+set -eu
 
-source $(dirname $0)/../conf/doll.cfg
+CONF_DIR="$(cd "$(dirname "$0")/../conf" && pwd)"
+CONF_FILE="${CONF_DIR}/doll.cfg"
 
+# shellcheck source=../conf/doll.cfg
+source "${CONF_FILE}"
 
 check() {
-	which parallel-ssh 
-	ssh -oConnectTimeout=10 ${PUPPETUSER}@${PUPPETMASTER} "puppet master --version"
+	which parallel-ssh
+	ssh -oConnectTimeout=10 ${PUPPETUSER}@${PUPPETMASTER} "${SUDO:-} ${PUPPET_PATH:-}puppet master --version"
 }
 
 check && echo " All tests passed." || echo " Failed to pass all tests!"
-
